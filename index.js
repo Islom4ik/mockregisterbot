@@ -96,7 +96,14 @@ const db = client.db('bot');
 const collection = db.collection('forms');
 const { DateTime } = require('luxon');
 
-bot.start((ctx) => ctx.reply(`Welcome!\nTo start registration, enter the command /register`));
+bot.start(async (ctx) => {
+    try {
+        let sides = await collection.findOne({_id: ObjectId('637cad61f831ac056f15f04c')})
+        await ctx.replyWithHTML(`Welcome!\nTo start registration, enter the command\n/register | <b>${60 - sides.forms.length}</b> spaces left to register 📄`)
+    }catch(e) {
+        console.error(e);
+    }
+});
 bot.help((ctx) => ctx.reply('To start registration, enter the command /register\nFor help, write to the examiner - @salva1ore'));
 bot.launch({dropPendingUpdates: true});
 bot.use(session());
@@ -104,44 +111,56 @@ bot.use(stage.middleware());
 
 bot.command('register', async ctx => {
     try {
-        let date = await DateTime.now().setZone('Asia/Tashkent').setLocale('uz-UZ');
-        if (date.c.month == 11) {
-            if (date.c.day < 25) {
-                let checkreq = await collection.findOne({user_id: ctx.message.from.id})
-                if (checkreq == null) {
-                    let colvo = await collection.findOne({_id: ObjectId('637cad61f831ac056f15f04c')})
-                    let lghs = colvo.forms.length;
-                    if (lghs <= 60) {
-                        await ctx.scene.enter('register') 
-                    }else {
-                        await ctx.reply('⚠️ Limit of 60 students')
-                    }
-                }else {
-                    await ctx.reply('⚠️ You are already registered')
-                }  
-            }else if (date.c.day == 25) {
-                if (date.c.hour < 22) {
-                    let checkreq = await collection.findOne({user_id: ctx.message.from.id})
-                    if (checkreq == null) {
-                        let colvo = await collection.findOne({_id: ObjectId('637cad61f831ac056f15f04c')})
-                        let lghs = colvo.forms.length;
-                        if (lghs <= 60) {
-                            await ctx.scene.enter('register') 
-                        }else {
-                            await ctx.reply('⚠️ Limit of 60 students')
-                        }
-                    }else {
-                        await ctx.reply('⚠️ You are already registered')
-                    }                
-                }else {
-                    await ctx.reply('Registration has already ended ⚠️') 
-                }
+        // let date = await DateTime.now().setZone('Asia/Tashkent').setLocale('uz-UZ');
+        // if (date.c.month == 11) {
+        //     if (date.c.day < 25) {
+        //         let checkreq = await collection.findOne({user_id: ctx.message.from.id})
+        //         if (checkreq == null) {
+        //             let colvo = await collection.findOne({_id: ObjectId('637cad61f831ac056f15f04c')})
+        //             let lghs = colvo.forms.length;
+        //             if (lghs <= 60) {
+        //                 await ctx.scene.enter('register') 
+        //             }else {
+        //                 await ctx.reply('⚠️ Limit of 60 students')
+        //             }
+        //         }else {
+        //             await ctx.reply('⚠️ You are already registered')
+        //         }  
+        //     }else if (date.c.day == 25) {
+        //         if (date.c.hour < 22) {
+        //             let checkreq = await collection.findOne({user_id: ctx.message.from.id})
+        //             if (checkreq == null) {
+        //                 let colvo = await collection.findOne({_id: ObjectId('637cad61f831ac056f15f04c')})
+        //                 let lghs = colvo.forms.length;
+        //                 if (lghs <= 60) {
+        //                     await ctx.scene.enter('register') 
+        //                 }else {
+        //                     await ctx.reply('⚠️ Limit of 60 students')
+        //                 }
+        //             }else {
+        //                 await ctx.reply('⚠️ You are already registered')
+        //             }                
+        //         }else {
+        //             await ctx.reply('Registration has already ended ⚠️') 
+        //         }
+        //     }else {
+        //         await ctx.reply('⚠️ There are no plans to conduct mock tests')
+        //     }                 
+        // }else {
+        //     await ctx.reply('⚠️ There are no plans to conduct mock tests this month')
+        // }    
+        let checkreq = await collection.findOne({user_id: ctx.message.from.id})
+        if (checkreq == null) {
+            let colvo = await collection.findOne({_id: ObjectId('637cad61f831ac056f15f04c')})
+            let lghs = colvo.forms.length;
+            if (lghs <= 60) {
+                await ctx.scene.enter('register') 
             }else {
-                return
-            }                 
+                await ctx.reply('⚠️ Limit of 60 students')
+            }
         }else {
-            await ctx.reply('⚠️ There are no plans to conduct mock tests this month')
-        }    
+            await ctx.reply('⚠️ You are already registered')
+        }                
     }catch(e) {
         console.error(e);
     }
